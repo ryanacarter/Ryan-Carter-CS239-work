@@ -13,11 +13,9 @@ INDEX VERSION 1.126+/Users/ryanacarter/Dropbox/CS239/.metadata/.plugins/org.ecli
 770573466.index
 3712507179.index
 4118765929.index
-1003597803.index
 1963573212.index
 3266567714.index
 4249315662.index
-4112692500.index
 2089348824.index
 4238209716.index
 219492538.index
