@@ -1,0 +1,409 @@
+package Model;
+
+import static org.junit.Assert.*;
+
+import org.junit.*;
+
+/**
+ * Test class for WavFiles
+ * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
+ * Modifications: PA2 (2/14/2013)
+ * - added methods to test getSortString()
+ * - added methods to test setTrack(String)
+ * 
+ * Modifications: RAC PA3 (3/29/2013)
+ *  - adapted for WavFiles
+ *   
+ * @author Michael Norton
+ * @author Ryan Carter
+ * @version PA2 (2/14/2013), PA1 (1/24/2013)
+ *
+ */
+public class WavFileTest
+{
+    /**
+     * Test method for {@link AudioFile#AudioFile()} 
+     * - test the default constructor
+     */
+    @Test
+    public void testAudioFile()
+    {
+        WavFile file = new WavFile();
+        assertTrue( file.getAlbum().length() == 0 );
+        assertTrue( file.getArtist().length() == 0 );
+        assertTrue( file.getTitle().length() == 0 );
+        assertTrue( file.getTrack() == 0 );
+        assertTrue( file.getPath().length() == 0 );
+        assertTrue( file.getLength() == 0 );
+        
+    } // method testAudioFile
+
+
+
+    /**
+     * Test method for {@link AudioFile#AudioFile(java.lang.String, 
+     *     java.lang.String, java.lang.String, int)}.
+     *  -- test the explicit vvalue constructor
+     */
+    @Test
+    public void testAudioFileExplicitGood()
+    {
+        WavFile file = new WavFile("abc", "def", "efg", 9, "lab", 256 );
+        assertTrue( file.getAlbum().equals( "efg" ) );
+        assertTrue( file.getArtist().equals( "abc" ) );
+        assertTrue( file.getTitle().equals( "def" ) );
+        assertTrue( file.getTrack() == 9 );
+        assertTrue( file.getPath().equals( "lab" ) );
+        assertTrue( file.getLength() == 256 );
+
+    } //method testAudioFileExplicitGood
+
+    
+    /**
+     * Test method for {@link AudioFile#AudioFile(java.lang.String, 
+     *      java.lang.String, java.lang.String, int)}
+     * - Test explicit value constructor with null & invalid data
+     */
+    @Test
+    public void testAudioFileExplicitBad()
+    {
+        WavFile file = new WavFile( null, null, null, 100, null, 103 );
+        assertNotNull( file.getAlbum() );
+        assertTrue( file.getAlbum().length() == 0 );
+        assertNotNull( file.getArtist() );
+        assertTrue( file.getArtist().equals( "No Artist" ) );
+        assertNotNull( file.getTitle() );
+        assertTrue( file.getTitle().equals( "No Title" ) );
+        assertTrue( file.getTrack() == 0 );
+        assertTrue( file.getPath().equals( "No Path" ) );
+        assertTrue( file.getLength() == 103 );
+
+    } // method testAudioFileExplicitBad
+
+    
+    /**
+     * The method for {@link AudioFile#AudioFile(java.lang.String, 
+     *      java.lang.String, java.lang.String, int)}
+     *      - test for good equals method
+     *      
+     * **RAC (PA3) - added method
+     */
+    @Test
+    public void testGoodEquals()
+    {
+        AudioFile file1 = new WavFile("abc", "def", "ghi", 0, "jkl", 19);
+        AudioFile file2 = new WavFile("abc", "def", "ghi", 0, "jkl", 19);
+        
+        assertTrue( file1.equals( file2 ) );
+    }
+    
+    /**
+     * The method for {@link AudioFile#AudioFile(java.lang.String, 
+     *      java.lang.String, java.lang.String, int)}
+     *      - test for bad equals method
+     *      
+     * **RAC (PA3) - added method
+     */
+    @Test
+    public void testBadEquals()
+    {
+        AudioFile file1 = new WavFile("abc", "def", "ghi", 0, "jkl", 19);
+        AudioFile file2 = new WavFile("abc", "def", "ghi", 0, "jl", 19);
+        
+        assertFalse( file1.equals( file2 ) );
+    }
+    
+    
+    /**
+     * Test method for {@link AudioFile#getSortString()} - test sort string 
+     * for normal AudioFile with album
+     */
+    @Test
+    public void testGetSortStringNormalWithAlbum()
+    {
+        char delim = (char)0;
+        WavFile file = new WavFile("abc", "def", "efg", 9, "aefae", 0 );
+        String expected = "abc" + delim + "efg" + delim + "09" + delim +
+                "def";
+        assertTrue( file.getSortString().equals( expected ) );
+        
+    } // method testGetSortStringNormalWithAlbum
+    
+
+    /**
+     * Test method for {@link AudioFile#getSortString()} - test sort string 
+     * for normal AudioFile without album
+     */
+    @Test
+    public void testGetSortStringNormalWithoutAlbum()
+    {
+        char delim = (char)0;
+        WavFile file = new WavFile("abc", "def", null, 0, "asdf", 0 );
+        String expected = "abc" + delim + "~~~~~~~~~~~~" + delim + "~~" +
+                delim + "def";
+        System.out.println( file.getSortString() );
+        assertTrue( file.getSortString().equals( expected ) );
+                
+    } // method testGetSortStringNormalWithoutAlbum()
+    
+
+    /**
+     * Test method for {@link AudioFile#getSortString()} - test sort string 
+     * for abnormal AudioFile with album
+     */
+    @Test
+    public void testGetSortStringAbnormalWithAlbum()
+    {
+        char delim = (char)0;
+        WavFile file = new WavFile( null, null, "abc", 0 , "laksdf", 0);
+        String expected = "no artist" + delim + "abc" + delim + "~~" +
+                delim + "no title";
+        System.out.println( file.getSortString() );
+        assertTrue( file.getSortString().equals( expected ) );
+                
+    } // method testGetSortStringAbnormalWithAlbum
+    
+
+    /**
+     * Test method for {@link AudioFile#setAlbum()} - test bad album
+     */
+    @Test
+    public void testSetAlbumBad()
+    {
+        WavFile file = new WavFile();
+        file.setAlbum( null );
+        
+        assertNotNull( file.getAlbum() );
+        assertTrue( file.getAlbum().length() == 0 );
+
+    } // method testSetAlbumBad
+
+
+
+    /**
+     * Test method for {@link AudioFile#setAlbum()} - test good album
+     */
+    @Test
+    public void testSetAlbumGood()
+    {
+        WavFile file = new WavFile();
+        file.setAlbum( "Album" );
+        
+        assertNotNull( file.getAlbum() );
+        assertTrue( file.getAlbum().equals( "Album") );
+
+    } // method testSetAlbumGood
+
+
+
+    /**
+     * Test method for {@link AudioFile#setArtist()} - test bad artist
+     */
+    @Test
+    public void testSetArtistBad()
+    {
+        WavFile file = new WavFile();
+        file.setArtist( null );
+        
+        assertNotNull( file.getArtist() );
+        assertTrue( file.getArtist().equals( "No Artist" ) );
+    
+    } // method testSetTitleBad
+
+
+
+    /**
+     * Test method for {@link AudioFile#setArtist()} - gest good artist
+     */
+    @Test
+    public void testSetArtistGood()
+    {
+        WavFile file = new WavFile();
+        file.setArtist( "Artist" );
+        
+        assertNotNull( file.getArtist() );
+        assertTrue( file.getArtist().equals( "Artist") );
+
+    } // method testSetArtistGood
+
+
+
+    /**
+     * Test method for {@link AudioFile#setTitle()} - test bad title
+     */
+    @Test
+    public void testSetTitleBad()
+    {
+        WavFile file = new WavFile();
+        file.setTitle( null );
+        
+        assertNotNull( file.getTitle() );
+        assertTrue( file.getTitle().equals( "No Title" ) );
+
+    } // method testSetTitleBad
+
+
+
+    /**
+     * Test method for {@link AudioFile#setTitle()} - set good title
+     */
+    @Test
+    public void testSetTitleGood()
+    {
+        WavFile file = new WavFile();
+        file.setArtist( "Title" );
+        
+        assertNotNull( file.getTitle() );
+        assertTrue( file.getArtist().equals( "Title") );
+
+    } // method testSetTitleGood
+
+
+    /**
+     * Test method for {@link AudioFile#setTrack()} - set track too high
+     */
+    @Test
+    public void testSetTrackAfterLast()
+    {
+        WavFile file = new WavFile();
+        file.setTrack( 50 );
+        file.setTrack( 100 );
+        assertTrue( file.getTrack() == 50 );
+
+    } // method testSetTrackAfterLast
+
+
+    /**
+     * Test method for {@link AudioFile#SetTrack()} - test track too low
+     */
+    @Test
+    public void testSetTrackBeforeFirst()
+    {
+        WavFile file = new WavFile();
+        file.setTrack( 50 );
+        file.setTrack( 0 );
+        assertTrue( file.getTrack() == 50 );
+
+    } // method testSetTrackBeforeFirst
+
+    
+    /**
+     * Test method for {@link AudioFile#SetTrack()} - test set first track
+     */
+    @Test
+    public void testSetTrackFirst()
+    {
+        WavFile file = new WavFile();
+        file.setTrack( 20 );
+        file.setTrack( 1 );
+        assertTrue( file.getTrack() == 1 );
+
+    } // method testSetTrackFirst
+
+
+
+    /**
+     * Test method for {@link AudioFile#SetTrack()} - test set last track
+     */
+    @Test
+    public void testSetTrackLast()
+    {
+        WavFile file = new WavFile();
+        file.setTrack( 20 );
+        file.setTrack( 99 );
+        assertTrue( file.getTrack() == 99 );
+
+    } // method testSetTrackLast
+
+
+    /**
+     * Test method for {@link AudioFile#SetTrack()} - test set middle track
+     */
+    @Test
+    public void testSetTrackMiddle()
+    {
+        WavFile file = new WavFile();
+        file.setTrack( 20 );
+        file.setTrack( 50 );
+        assertTrue( file.getTrack() == 50 );
+
+    } // method testSetTrackMiddle
+
+
+    /**
+     * Test method for {@link AudioFile#SetTrack(Java.lang.String)} - test set 
+     * empty track
+     */
+    @Test
+    public void testSetTrackWithStringEmpty()
+    {
+        WavFile file = new WavFile();
+        file.setTrack( "100" );
+        file.setTrack( "" );
+        assertTrue( file.getTrack() == 0 );
+        
+    } // method testSetTrackWithStringEmpty
+    
+    
+    /**
+     * Test method for {@link AudioFile#SetTrack(Java.lang.String)} - test set 
+     * valid track
+     */
+    @Test
+    public void testSetTrackWithStringGood()
+    {
+        WavFile file = new WavFile();
+        file.setTrack( "50" );
+        file.setTrack( "" );
+        assertTrue( file.getTrack() == 50 );
+        
+    } // method testSetTrackWithStringGood
+    
+    
+    /**
+     * Test method for {@link AudioFile#SetTrack(Java.lang.String)} - test set 
+     * null track
+     */
+    @Test
+    public void testSetTrackWithStringNull()
+    {
+        WavFile file = new WavFile();
+        file.setTrack( "50" );
+        file.setTrack( null );
+        assertTrue( file.getTrack() == 50 );
+        
+    } // method testSetTrackWithStringNull
+    
+    
+    /**
+     * Test method for {@link java.lang.Object#toString()} - test toString
+     * with album
+     */
+    @Test
+    public void testToStringWithAlbum()
+    {
+        WavFile file = new WavFile( "Abc", "Def", "Ghi", 90, "Dase", 0 );
+        assertTrue( file.toString().equals( "Abc, Def (Ghi)") );
+
+    } // method testToStringWithAlbum
+
+
+    /**
+     * Test method for {@link java.lang.Object#toString()} - test toString
+     * without album
+     */
+    @Test
+    public void testToStringWithoutAlbum()
+    {
+        WavFile file = new WavFile( "Abc", "Def", "", 90, "asdfD", 0 );
+        assertTrue( file.toString().equals( "Abc, Def") );
+    
+    } // method testToStringWithoutAlbum
+
+} // class AudioFileTest

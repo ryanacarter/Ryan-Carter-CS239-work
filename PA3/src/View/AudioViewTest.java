@@ -7,6 +7,12 @@ import java.io.*;
 /**
  * Test the methods of the AudioView class
  * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
  * Modifications:   **MLN (PA2) - modified testGetInputEmptyRequired to 
  *                                reflect fix in AudioView
  *                              - filled in testUnavailable to ensure full

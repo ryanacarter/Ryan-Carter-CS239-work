@@ -8,6 +8,12 @@ import java.io.*;
  * a generic object: AudioFileIO myFile = new AudioFileIO() and then call
  * the open method: myFile.open( "Filename", FileIO.READING ).
  * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
  * Modifications: **MLN: PA2 (2/10/2013) - New for PA2
  * 
  * @author Michael Norton

@@ -5,55 +5,41 @@ import java.text.*;
 /**
  * A single AudioFile
  * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
  * Modifications: PA2 (2/10/2013) 
  *  - added overloaded version of setTrack(String ) 
  *  - added getSortString() 
  *  - override equals method to facilitate contains method in AudioList
  *  - modified setArtist() & setTitle() to set default value if null or empty
  *    parameter
+ *    
+ *    Modification: PA3 (3/29/2013)
+ *    - changed to abstract Class
+ *    - equals only looks and pathname
  * 
+ * @author Ryan Carter
  * @author Michael Norton
- * @version PA2 (2/12/2013), PA1 (1/18/2013)
+ * @version PA3 (3/28/2013), PA2 (2/12/2013), PA1 (1/18/2013)
  */
-public class AudioFile
+public abstract class AudioFile
 {
     //----------------------------------------------------------------------
     // Declarations
     //----------------------------------------------------------------------
-    private int track;
+    protected int track;
 
-    private String album;
-    private String artist;
-    private String title;
+    protected String album;
+    protected String artist;
+    protected String fileName;
+    protected String pathName;
+    protected String title;
 
-    /**
-     * Default constructor
-     */
-    public AudioFile()
-    {
-        album = "";
-        artist = "";
-        title = "";
-        track = 0;
-
-    } // default constructor
-
-
-    /**
-     * Explicit value constructor
-     */
-    public AudioFile(String artist, String title, String album, int track)
-    {
-        this.artist = ( artist == null || artist.length() == 0 ) ? 
-                "No Artist" : artist;
-        this.title = ( title == null || title.length() == 0 ) ? 
-                "No Title" : title;
-        this.album = album == null ? "" : album;
-        this.track = track < 0 || track > 99 ? 0 : track;
-
-    } // explicit value constructor
-
-
+    
     /**
      * Returns true if all attributes in this AudioFile are the same as
      * those in the other AudioFile.  This method overrides the built-in
@@ -61,33 +47,30 @@ public class AudioFile
      * 
      * **MLN (PA2) - added to facilitate the AudioList contains method
      * 
+     * **RAC (PA3) - only looks at the pathname of the file.
+     * 
      * @param the other AudioFile
      * @return true if both AudioFiles contain the same values for all
      *         attributes
      */
     public boolean equals( Object other )
     {
-        boolean isEqual = false;
+        Boolean forReturn = false;
+        AudioFile file = ( AudioFile ) other;
 
-        if ( other != null )
-            if ( this == other )
-                isEqual = true; // if the same object
-            else
+        if (other != null)
+        {
+            if( file.getPathName().equals( pathName ) )
             {
-                AudioFile audio = (AudioFile) other;
+                forReturn = true;
+            }
 
-                if ( artist.equals( audio.getArtist() )
-                        && title.equals( audio.getTitle() )
-                        && album.equals( audio.getAlbum() )
-                        && track == audio.getTrack() )
-                    isEqual = true; // if different, but contents are the same
-                
-            } // end else
+        }
 
-        return isEqual;
-
-    } // method equals
-
+        return forReturn;
+        
+    } //end method
+    
 
     /**
      * Return the album information
@@ -143,6 +126,11 @@ public class AudioFile
 
     } // method getSortString
 
+    
+    public String getPathName()
+    {
+        return pathName;
+    }
 
     /**
      * Return the title information
@@ -166,8 +154,8 @@ public class AudioFile
         return track;
 
     } // method getTrack
-
-
+    
+    
     /**
      * Set the album info
      * 
@@ -196,6 +184,18 @@ public class AudioFile
             this.artist = "No Artist";
 
     } // method setArtist
+    
+    
+    /**
+     * Sets the pathName information
+     * 
+     * @param pathName
+     */
+    public void setPathName(String pathName)
+    {
+        if(pathName != null && pathName.length() > 0)
+            this.pathName = pathName;
+    }
 
 
     /**
@@ -254,7 +254,7 @@ public class AudioFile
                 
     } // method setTrack
 
-
+    
     /**
      * Return a string representation for an audio file
      * 

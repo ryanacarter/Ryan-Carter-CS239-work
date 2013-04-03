@@ -2,8 +2,8 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="263" key="DIALOG_WIDTH"/>
-		<item value="131" key="DIALOG_Y_ORIGIN"/>
-		<item value="1487" key="DIALOG_X_ORIGIN"/>
+		<item value="162" key="DIALOG_Y_ORIGIN"/>
+		<item value="1262" key="DIALOG_X_ORIGIN"/>
 		<item value="399" key="DIALOG_HEIGHT"/>
 		<item value="1|Lucida Grande|11.0|0|COCOA|1|LucidaGrande" key="DIALOG_FONT_NAME"/>
 	</section>
@@ -13,18 +13,22 @@
 		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="" key="selection"/>
+		<item value="pathName" key="selection"/>
 		<list key="findhistory">
-			<item value="print"/>
-			<item value="sortTwoStrings"/>
-			<item value="songlist.txt"/>
-			<item value="truncate"/>
-			<item value="pri"/>
+			<item value="pathName"/>
+			<item value="label"/>
+			<item value="create"/>
+			<item value="instanceof"/>
+			<item value="|"/>
+			<item value="protected"/>
+			<item value="System.out"/>
 			<item value="System.out.print"/>
-			<item value="myCollection"/>
-			<item value="getChar"/>
 		</list>
 		<list key="replacehistory">
+			<item value="path"/>
+			<item value="private"/>
+			<item value="[counter]"/>
+			<item value="counter"/>
 			<item value="Songlist.txt"/>
 			<item value="collection"/>
 		</list>

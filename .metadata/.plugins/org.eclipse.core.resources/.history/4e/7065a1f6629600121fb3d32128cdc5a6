@@ -1,0 +1,549 @@
+package Controller;
+
+import View.*;
+import Model.*;
+
+/**
+ * Controls the action of the JMUTunes application. This is the only class
+ * that has references to the model and view classes
+ * 
+ * Modifications: **MLN PA2 (2/10/2013) 
+ *   - modified delete method to allow deletion of user selected file
+ *   - enabled edit method to edit user selected file
+ *   - created overloaded getAudioInfo(AudioFile) to handle edit
+ *   
+ *   Modificaiton: **RAC PA3 (3/29/2013)
+ *   - deleted getAudioInfo due to change in add method
+ *   - deleted overloaded getAudioInfor
+ *   - edit now class to the edit class to handle the editing of the file
+ * 
+ * @author Michael Norton
+ * @version PA2 (2/12/2013), PA1 (1/19/2013)
+ */
+public class AudioControl
+{
+    //----------------------------------------------------------------------
+    // Declarations
+    //----------------------------------------------------------------------
+    protected int page;
+
+    protected AudioList list;
+    private AudioList searchList;
+    protected AudioView view;
+    protected AudioFileControl fileController;
+    private boolean inSearch;
+
+    // public static finals
+    public static char ADD = 'a';
+    public static char BACK = 'b';
+    public static char DELETE = 'd';
+    public static char EDIT = 'e';
+    public static char LIST = 'l';
+    public static char NEXT = 'n';
+    public static char PLAY = 'p';
+    public static char SEARCH = 's';
+    public static char QUIT = 'q';
+
+    /**
+     * Default constructor
+     */
+    public AudioControl()
+    {
+        page = 0;
+        
+        inSearch = false;
+        list = new AudioList();
+        searchList = new AudioList();
+        view = new AudioView();
+        fileController = new AudioFileControl( list );
+
+    } // default constructor
+
+
+    /************************** public methods ****************************/
+
+    /**
+     * This method has the outermost level of program control. The program
+     * will display the screen, ask the user to choose an action, then
+     * respond to the action designated by the user. The program will
+     * continue until the user chooses to quit.
+     * 
+     * **MLN (PA2) - Modified for PA2 to read/write files
+     * 
+     * **RAC (PA3) - added search screen boolean to all the change between
+     *                       searchList and list
+     */
+    public void run() 
+    {
+        char choice = (char) 0; // default to nonsensical value
+
+        
+        fileController.readFile();
+
+        do
+        {
+            showScreen();
+            choice = getChoice();
+            respondToChoice( choice );
+            
+        } while ( choice != QUIT );
+        
+        fileController.writeFile();
+
+    } // method run
+
+    /************************* private methods ****************************/
+
+    /**
+     * Add an audio file to the list
+     * 
+     * **RAC (PA3) - go back to home screen at the end if user in in search
+     */
+    private void addAudioFile()
+    {
+        // if 1, the user wants to look for a file that is MP3, if 2 the user wants
+        // the method to search for a file that is a WAV. 3 means both.
+        int audioType = 0;
+        String directory = null;
+        
+        // Print the menu for the user to choose
+        view.clearScreen();
+        view.displayLine("Add MP3 files, Wav files, or both:");
+        view.displayLine("1. MP3 Files");
+        view.displayLine("2. WAV Files");
+        view.displayLine("3. Both");
+        view.display("-> ");
+        audioType = view.getNumber(true, 1, 3);
+        
+        // get starting directory
+        view.displayLine("");
+        view.display("Starting Folder -> ");
+        directory = view.getInput(false, "");
+        
+        // Choose the correct subclass to finish adding the audioFiles to 
+        // the list.
+        if (audioType == 1)
+        {
+            fileController.addNewFiles(directory, audioType);
+        }
+        else if (audioType == 2)
+        {
+            fileController.addNewFiles(directory, audioType);
+        }
+        else if (audioType == 3)
+        {
+            fileController.addNewFiles(directory, audioType);
+        }
+        
+        // go back to home screen if the user was in a search
+        inSearch = false;
+
+    } // method addAudioFile
+
+
+    /**
+     * Delete an audio file (PA1 - delete last audio file)
+     * 
+     * **MLN (PA2) - allow deletion of the file chosen by the user
+     * **RAC (PA3) - accomidates for the search list.
+     */
+    private void deleteAudioFile()
+    {
+        if ( list.size() > 0 )
+        {
+            int fileNumber = 0;
+            AudioFile deleteFile;
+
+            if (!inSearch)
+            {
+                view.display( "Delete file number -> " );
+                fileNumber = view.getNumber( true, 1 , list.size() );
+
+                deleteFile = list.get( fileNumber - 1 );
+
+                view.clearScreen();
+                view.centerText( "Delete Audio File" );
+                view.displayLine();
+                view.displayLine();
+
+                if ( isConfirmed( "Delete \"" + deleteFile.toString()
+                        + "\"? (Y/N) -> " ) )
+                    list.remove( list.size() - 1 );
+            }
+            else
+            {
+                view.display( "Delete file number -> " );
+                fileNumber = view.getNumber( true, 1 , searchList.size() );
+
+                deleteFile = searchList.get( fileNumber - 1 );
+
+                view.clearScreen();
+                view.centerText( "Delete Audio File" );
+                view.displayLine();
+                view.displayLine();
+
+                if ( isConfirmed( "Delete \"" + deleteFile.toString()
+                        + "\"? (Y/N) -> " ) )
+                {
+                    searchList.remove( list.size() - 1 );
+                    list.remove( list.size() - 1 );
+                }
+            }
+
+        } // end if
+
+        else
+            view.pause( "Nothing to delete." );
+
+    } // method deleteAudioFile
+
+
+    /**
+     * Edit an audio file (not functional in PA1)
+     * 
+     * **MLN (PA2) - Edit file chosen by the user
+     * **RAC (PA3) - Edit both MP3 and WAV files
+     *                     - accomidate for the search function
+     */
+    private void editAudioFile()
+    {
+        Edit edit = new Edit( view );
+
+        if ( list.size() > 0 )
+        {
+            int fileNumber = 0;
+            AudioFile original;
+            AudioFile edited;
+
+            if (!inSearch)
+            {
+                view.display( "Edit file number -> " );
+                fileNumber = view.getNumber( true, 1 , list.size() );
+
+                original = list.get( fileNumber - 1 );
+
+                if ( isConfirmed( "Edit \""
+                        + original.toString()
+                        + "\"? (Y/N) -> " ) )
+                {
+                    edited = edit.editAudioFile( original );
+
+                    if ( isConfirmed( "Confim Edit (Y/N): " ) )
+                    {
+                        list.remove( original );
+                        list.add( edited );
+
+                    } // end if
+                }
+            }
+            
+            else
+            {
+                view.display( "Edit file number -> " );
+                fileNumber = view.getNumber( true, 1 , searchList.size() );
+
+                original = searchList.get( fileNumber - 1 );
+
+                if ( isConfirmed( "Edit \""
+                        + original.toString()
+                        + "\"? (Y/N) -> " ) )
+                {
+                    edited = edit.editAudioFile( original );
+
+                    if ( isConfirmed( "Confim Edit (Y/N): " ) )
+                    {
+                        searchList.remove( original );
+                        searchList.add( edited );
+
+                        list.remove( original );
+                        list.add( edited );
+                    }
+
+                }
+            }
+        }
+        else
+            view.pause( "Nothing to edit." );
+
+        } // method editAudioFile
+
+
+    /**
+     * Get a valid menu choice from the user
+     * 
+     * @return the validated choice
+     */
+    private char getChoice()
+    {
+        boolean isValid = false;
+
+        String input;
+
+        do
+        {
+            input = view.getInput( false , "" );
+
+            isValid = isValidChoice( input , "aedslpnbq" );
+
+            if ( !isValid )
+                view.displayError( "Incorrect entry (" + input + ")" );
+            
+
+        } while ( !isValid );
+
+        return input.toLowerCase().charAt( 0 );
+
+    } // method getChoice
+
+
+    /**
+     * Handle playlists (not functional in PA1)
+     */
+    private void handlePlayLists()
+    {
+        view.showUnavailable( "Maintain Playlists" );
+
+    } // method handlePlayLists
+
+
+    /**
+     * Confirms (Y/N) an operation
+     * 
+     * @return true if the user enters 'Y' or 'y'
+     */
+    private boolean isConfirmed( String message )
+    {
+        boolean confirmed = false;
+        boolean isValid = false;
+
+        String input = "";
+
+        view.displayLine();
+        
+        // make sure there is a message to print before continuing
+        if ( message != null && message.length() > 0 )
+        {
+            view.display( message );
+
+            do
+            {
+                input = view.getInput( true , "Required entry." );
+
+                isValid = isValidChoice( input , "yn" );
+
+                if ( !isValid )
+                    view.displayError( "Must be 'Y' or 'N'." );
+
+            } while ( !isValid );
+
+            confirmed = input.toLowerCase().charAt( 0 ) == 'y';
+        }
+        
+        return confirmed;
+
+    } // method isConfirmed
+
+
+    /**
+     * Determines whether the input value is among the valid choices
+     * 
+     * @param input
+     * @return true if the input value is among the valid choices
+     */
+    private boolean isValidChoice(String input, String validChoices)
+    {
+        boolean isValid = false;
+
+        // make sure there are valid choices to check & that the input is
+        // a single character 
+        if ( validChoices != null && validChoices.length() > 0 )
+            if ( input.length() == 1 )
+                if ( validChoices.indexOf( 
+                        input.toLowerCase().charAt( 0 ) ) > -1 )
+                    isValid = true;
+
+        return isValid;
+
+    } // method isValidChoice
+
+
+    /**
+     * Print the next page of audio files if there is one
+     */
+    private void nextPage()
+    {
+        if ( list.size() > page * 16 + 16 )
+            page++;
+
+    } // method nextPage
+
+
+    /**
+     * Play an audio file (not functional in PA1)
+     */
+    private void playAudioFile()
+    {
+        view.showUnavailable( "Play Audio File" );
+
+    } // method playAudioFile
+
+
+    /**
+     * Print the prior page of audio files if there is one
+     */
+    private void priorPage()
+    {
+        if ( page > 0 )
+            page--;
+        
+    } // method nextPage
+
+
+    /**
+     * Perform the operation selected by the user from the menu
+     * 
+     * @param choice
+     */
+    private void respondToChoice( char choice )
+    {
+        switch (choice)
+        {
+            case 'a':
+                addAudioFile();
+                break;
+            case 'e':
+                editAudioFile();
+                break;
+            case 'd':
+                deleteAudioFile();
+                break;
+            case 's':
+                searchAudioFiles();
+                break;
+            case 'l':
+                handlePlayLists();
+                break;
+            case 'p':
+                playAudioFile();
+                break;
+            case 'b':
+                priorPage();
+                break;
+            case 'n':
+                nextPage();
+                break;
+            case 'q':
+                view.clearScreen();
+                break;
+            default:
+                view.pause( "Oops! Error!!" );
+                showScreen();
+
+        } // end switch
+
+    } // method respondToChoice
+
+
+    /**
+     * Search for audio files (not functional in PA1)
+     */
+    private void searchAudioFiles()
+    {   
+        Search search = new Search(list);
+        
+        searchList = search.run();
+        
+        if(searchList == null)
+            inSearch = false;
+        else
+            inSearch = true;
+        
+    } // method searchAudioFiles
+
+
+    /**
+     * Show the body of the page
+     * 
+     * Modification: **RAC - added if statement to account for search
+     */
+    private void showBody()
+    {
+        if ( !inSearch )
+            for (int i = page * 16 + 1; i < page * 16 + 17; i++)
+                view.displayLine( spaceFillNumber( i ) + ". "
+                        + list.getShortTitle( i - 1 ) );
+        else
+        {
+            for (int i = page * 16 + 1; i < page * 16 + 17; i++)
+                view.displayLine( spaceFillNumber( i ) + ". "
+                        + searchList.getShortTitle( i - 1 ) );
+            
+        }
+
+
+    } // method showBody
+
+
+    /**
+     * Show the bottom of the primary screen
+     */
+    private void showFoot()
+    {
+        view.displayLine();
+        view.displayLine( "(A)dd. (E)dit, (D)elete, (S)earch, play(L)ist, "
+                + "(P)lay, (N)ext, (B)ack, (Q)uit" );
+        view.displayLine();
+        view.display( "Choose Operation -> " );
+
+    } // method showFoot
+
+
+    /**
+     * Show the top of the primary screen
+     * 
+     * Modification: **RAC - added if statement to account for search
+     */
+    private void showHead()
+    {
+        view.centerText( "JMUTunes Audio Player" );
+        view.centerText( "CS239 (Spring 2013)" );
+        if (inSearch)
+            view.centerText("Search Results");
+        view.displayLine();
+
+    } // method showHead
+
+
+    /**
+     * Show the primary screen
+     * 
+     */
+    private void showScreen()
+    {
+        view.clearScreen();
+        showHead();
+        showBody();
+        showFoot();
+
+    } // method showScreen
+
+
+    /**
+     * Space-fill the number if necessary
+     * 
+     * @param the number to space fill
+     * @return the number as a space-filled String
+     */
+    private String spaceFillNumber( int num )
+    {
+        String numAsString = "" + num;
+        String lastNumAsString = "" + ( ( page * 16 ) + 16 );
+
+        if ( lastNumAsString.length() > numAsString.length() )
+            numAsString = " " + numAsString;
+
+        return numAsString;
+
+    } // method spaceFillNumber
+
+} // class AudioControl

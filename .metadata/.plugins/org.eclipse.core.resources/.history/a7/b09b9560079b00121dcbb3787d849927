@@ -1,0 +1,262 @@
+package Controller;
+
+import Model.AudioList;
+
+
+/**
+ * The search class is used to handle all of the serach functions of the 
+ * program.
+ * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
+ * @author Ryan Carter
+ * @param PA3 (3/2/2013)
+ *
+ */
+public class Search
+{
+    private AudioList searchList;
+    
+    /**
+     * default constructor
+     */
+    public Search(AudioList list)
+    {
+        searchList = list;
+        
+    } // end method
+    
+    
+/***************************** Public Methods*********************************/
+    
+    /**
+     * 
+     * @param searchFor
+     * @param param
+     * @param placeHolder
+     */
+    public AudioList addFiles( String[] searchFor, String param, 
+            AudioList newList )
+    {
+        boolean endLoop = false;
+        int counter = 0;
+        AudioList forReturn = new AudioList();
+        AudioList placeHolder = new AudioList();
+        
+        //Reset the main List
+        searchList = newList;
+        
+        if (searchFor[0] != null || searchFor[0] != "")
+        {
+            do
+            {
+                // if the param is starts with
+                if ( searchFor[ counter ].charAt( 0 ) == '^'
+                        && searchFor[ counter ].length() > 1 )
+                {
+                    placeHolder = 
+                            startsWith( searchFor[ counter ].substring( 1,
+                                    searchFor[ counter ].length() ), param );
+                }
+                // if the param is ends with
+                else if ( searchFor[ counter ].charAt( 0 ) == '$'
+                        && searchFor[ counter ].length() > 1 )
+                {
+                    placeHolder = 
+                            endsWith( searchFor[ counter ].substring( 1,
+                                    searchFor[ counter ].length() ), param );
+                }
+                // if the param is not
+                else if (searchFor[counter].length() > 2 && 
+                        searchFor[counter].substring(0, 2).equals( "!(" ) )
+                {
+                    placeHolder = notEqualTo(
+                            searchFor[ counter ].substring( 2,
+                                    searchFor[ counter ].length() - 1 ), param );
+                    
+                    placeHolder = difference(placeHolder);
+
+                }
+                // if the param is contains
+                else
+                {
+                    placeHolder = contains( searchFor[ counter ], param );
+                }
+                
+                for (int i = 0; i < placeHolder.size(); i++)
+                    forReturn.add( placeHolder.get( i ) );
+                
+                
+
+                counter ++;
+                
+                if (counter >= searchFor.length)
+                    endLoop = true;
+                else if (searchFor[counter] == null)
+                    endLoop = true;
+                else if (!searchFor[counter].equals("") )
+                    endLoop = true;
+
+
+            } while ( !endLoop);
+        }
+        
+         return forReturn;
+
+    }
+
+
+/***************************** Private Methods*********************************/
+    
+
+    private AudioList endsWith(String searchFor, String param)
+    {
+        AudioList forReturn = new AudioList();
+        
+        for (int i = 0; i < searchList.size(); i++)
+        {
+            if (searchList.get(i).getArtist().endsWith(searchFor) 
+                    && param.equals("artist"))
+            {
+                forReturn.add( searchList.get( i ) );
+            }
+            
+            if (searchList.get(i).getTitle().endsWith(searchFor) 
+                    && param.equals("title"))
+            {
+                forReturn.add( searchList.get( i ) );
+            }
+            
+            if (searchList.get(i).getAlbum().endsWith(searchFor)
+                    && param.equals("album"))
+            {
+                forReturn.add( searchList.get( i ) );
+            }
+            
+        } // end loop
+        
+        return forReturn;
+        
+    } // end method
+    
+    
+    /**
+     * Used to handle the contains searching function
+     * 
+     * @param searchFor
+     * @param param
+     */
+    private AudioList contains(String searchFor, String param)
+    {
+        AudioList forReturn = new AudioList();
+        
+        for (int i = 0; i < searchList.size(); i++)
+        {
+            if (searchList.get(i).getArtist().contains(searchFor) 
+                    && param.equals("artist"))
+            {
+                forReturn.add( searchList.get( i ) );
+            }
+            
+            if (searchList.get(i).getTitle().contains(searchFor) 
+                    && param.equals("title"))
+            {
+                forReturn.add( searchList.get( i ) );
+            }
+            
+            if (searchList.get(i).getAlbum().contains(searchFor)
+                    && param.equals("album"))
+            {
+                forReturn.add( searchList.get( i ) );
+            }
+            
+        } // end loop
+        
+        return forReturn;
+        
+    } // end method
+    
+  
+    /**
+     * Get the difference between this set and another - return the result
+     * as a set
+     * 
+     * @param other
+     * @return the difference set
+     */
+    private AudioList difference( AudioList other )
+    {
+        AudioList difference = new AudioList();
+        
+        for ( int i = 0; i < searchList.size(); i++ )
+            if ( !other.contains( searchList.get( i ) ) )
+                difference.add( searchList.get( i ) );   
+        
+        return difference;
+
+    } // method difference
+    
+    
+    private AudioList notEqualTo( String searchFor, String param)
+    {
+        AudioList forReturn = new AudioList();
+
+        // if the param is starts with
+        if ( searchFor.charAt(0) == '^' )
+        {
+            forReturn = startsWith( searchFor.substring( 1,
+                    searchFor.length() ), param );
+        }
+        // if the param is ends with
+        else if (searchFor.charAt(0) == '$')
+        {
+            forReturn = endsWith( searchFor.substring( 1,
+                    searchFor.length() ), param );
+        }
+        // if the param is contains
+        else
+        {
+            forReturn = contains( searchFor.substring( 1,
+                    searchFor.length() ), param );
+        }
+        
+        return forReturn;
+    }
+    
+    
+    private AudioList startsWith(String searchFor, String param)
+    {
+        AudioList forReturn = new AudioList();
+        
+        for (int i = 0; i < searchList.size(); i++)
+        {
+            if ( searchList.get( i ).getArtist().startsWith( searchFor ) 
+                    && param.equals( "artist" ) )
+            {
+                forReturn.add( searchList.get( i ) );
+            }
+            
+            if ( searchList.get( i ).getTitle().startsWith( searchFor ) 
+                    && param.equals( "title" ) )
+            {
+                forReturn.add( searchList.get( i ) );
+            }
+            
+            if ( searchList.get( i ).getAlbum().startsWith( searchFor )
+                    && param.equals( "album" ) )
+            {
+                forReturn.add( searchList.get( i ) );
+            }
+            
+        } // end loop
+        
+        return forReturn;
+        
+    } // end method
+    
+    
+} // end class

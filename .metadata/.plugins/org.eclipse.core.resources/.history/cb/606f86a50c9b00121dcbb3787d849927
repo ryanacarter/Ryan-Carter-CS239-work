@@ -1,0 +1,199 @@
+package Controller;
+
+import Model.*;
+import View.*;
+
+
+/**
+ * The Edit class is used to edit the AudioFiles for JMUTunes
+ * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
+ * Modifications: **RAC PA3 (3/29/2013) 
+ *   - added Edit class to handle the editing of file
+ * 
+ * 
+ * @author Ryan Carter
+ * @version PA3 (3/29/2013
+ *
+ */
+public class Edit
+{ 
+
+    private AudioView view;
+
+    /**
+     * Default constructor
+     * 
+     * @param view
+     */
+    public Edit( AudioView view )
+    {
+        this.view = view;
+
+    } // end method
+
+
+    /*********************************Public Methods******************************/
+
+
+    /**
+     * AudioFile - used to make the disussion about which type of audioFile
+     * is to be edited and makes the call to the proper method to handle
+     * the situation.
+     * 
+     * @param file to be edited
+     * @return the file that has be updated
+     */
+    public AudioFile editAudioFile(AudioFile file)
+    {
+        AudioFile edited = null;
+
+        if(file != null)
+        {
+            if ( file instanceof WavFile )
+                edited = getEditedWavFile( ( WavFile )file );
+
+            else if ( file instanceof MP3File )
+                edited = getEditedMP3File( ( MP3File )file );
+        }
+        return edited;
+
+    } // end method
+    
+    
+/*********************************Private Methods******************************/
+    
+    
+    /**
+     * getEditedMP3File - promts the user for edits, then returns the new audio
+     * file which the edits that were made
+     * 
+     * @return an AudioFile object
+     */
+    private AudioFile getEditedMP3File( MP3File original )
+    {
+        int bitrate = original.getBitrate();
+        int orgTrack = original.getTrack();
+        int track = 0;
+
+        String album = "";
+        String artist = "";
+        String filename = original.getPathName();
+        String label = "";
+        String orgAlbum = original.getAlbum();
+        String orgArtist = original.getArtist();
+        String orgTitle = original.getTitle();
+        String orgLabel = original.getLabel();
+        String title = "";
+
+        // print header
+        view.clearScreen();
+        view.centerText( "Edit Audio File" );
+        view.displayLine();
+        view.displayLine();
+
+        view.display( "Artist" + 
+                ( orgArtist.length() > 0 ? " (" + orgArtist + "): " : ": " ) );
+        artist = view.getInput( true , "Required entry." );
+
+        view.display( "Title" +
+                ( orgTitle.length() > 0 ? " (" + orgTitle + "): " : ": " ) );
+        title = view.getInput( true , "Required entry." );
+
+        view.display( "Album" + 
+                ( orgAlbum.length() > 0 ? " (" + orgAlbum + "): " : ": " ) );
+        album = view.getInput( false , "" );
+
+        view.display( "Track" +
+                ( orgTrack != 0 ? " (" + orgTrack + "): " : ": " ) );
+        track = view.getNumber( false, 1 , 99 );
+        view.displayLine();
+        
+        view.display( "Label" + 
+                ( orgLabel.length() > 0 ? " (" + orgLabel + "): " : ": " ) );
+        label = view.getInput( false , "" );
+        
+        view.displayLine( "Filename (" + filename + ")" );
+        
+        view.display( "Bitrate" +
+                ( bitrate != 0 ? " (" + bitrate + "): " : ": " ) );
+        view.displayLine();
+
+        artist = artist.length() > 0 ? artist : orgArtist;
+        title = title.length() > 0 ? title : orgTitle;
+        album = album.length() > 0 ? album : orgAlbum;
+        track = track != 0 ? track : orgTrack; 
+        label = label.length() > 0 ? label: orgLabel;
+
+        return new MP3File( artist , title , album , track, filename,
+                label, bitrate );
+
+    } // method getAudioInfo (overloaded for edit)
+
+
+    /**
+     * getEditedWavFile - promts the user for edits, then returns the new audio
+     * file which the edits that were made
+     * 
+     * @return an AudioFile object
+     */
+    private AudioFile getEditedWavFile(WavFile original)
+    {
+        int orgTrack = original.getTrack();
+        int track = 0;
+        long   orgLength = original.getLength();
+
+        String album = "";
+        String artist = "";
+        String orgAlbum = original.getAlbum();
+        String orgArtist = original.getArtist();
+        String orgTitle = original.getTitle();
+        String orgPath = original.getPathName();
+        String title = "";
+
+        // print header
+        view.clearScreen();
+        view.centerText( "Edit Audio File" );
+        view.displayLine();
+        view.displayLine();
+
+        view.display( "Artist" + 
+                ( orgArtist.length() > 0 ? " (" + orgArtist + "): " : ": " ) );
+        artist = view.getInput( false , "" );
+
+        view.display( "Title" +
+                ( orgTitle.length() > 0 ? " (" + orgTitle + "): " : ": " ) );
+        title = view.getInput( false , "" );
+
+        view.display( "Album" + 
+                ( orgAlbum.length() > 0 ? " (" + orgAlbum + "): " : ": " ) );
+        album = view.getInput( false , "" );
+
+        view.display( "Track" +
+                ( orgTrack != 0 ? " (" + orgTrack + "): " : ": " ) );
+        track = view.getNumber( false, 1 , 99 );
+        view.displayLine();
+        
+        view.displayLine( "Filename (" + orgPath + ")" );
+        
+        view.display( "Length" +
+                ( orgLength != 0 ? " (" + orgLength + "): " : ": " ) );
+        view.displayLine();
+
+        artist = artist.length() > 0 ? artist : orgArtist;
+        title = title.length() > 0 ? title : orgTitle;
+        album = album.length() > 0 ? album : orgAlbum;
+        track = track != 0 ? track : orgTrack;        
+
+        return new WavFile( artist , title , album , track, 
+                orgPath, orgLength  );
+    
+    } // end method
+    
+
+} // end class

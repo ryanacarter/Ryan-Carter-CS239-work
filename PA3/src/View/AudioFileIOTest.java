@@ -7,6 +7,12 @@ import org.junit.*;
 /** 
  * Test the methods of the AudioFileIO class
  * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
  * Modifications: **MLN: PA2 (2/14/2013) - New for PA2
  * 
  * @author Michael Norton

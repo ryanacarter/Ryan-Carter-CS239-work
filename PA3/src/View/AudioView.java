@@ -5,6 +5,12 @@ import java.io.*;
  * AudioView - handles the interaction between the control part of the 
  * program and the user.  All screen and keyboard I/O is here.
  * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
  * Modifications:   **MLN (PA2) - fixed newline after retry in getInput()
  *                              - added checks for null & empty for getInput
  *                                and pause methods
@@ -12,9 +18,12 @@ import java.io.*;
  *                                distinguish between non-required values 
  *                                (track) and required values (listings) for
  *                                edit and delete.
+ *                                
+ *                          **RAC (PA3) - added check to get input to catch
+ *                              spaces only input.
  * 
  * @author Michael Norton
- * @version PA2 (2/18/2013), PA1 (1/19/2013)
+ * @version PA3 (3/2/2013), PA2 (2/18/2013), PA1 (1/19/2013)
  *
  */
 public class AudioView
@@ -36,6 +45,23 @@ public class AudioView
 
     /**************************** public Methods *************************/
 
+    /**
+     * backspace - prints out the backspace escape
+     * 
+     * @param length
+     */
+    public void clearLine()
+    {
+        for (int i = 0; i < 80; i++)
+            System.out.print("\b");
+        
+        for (int i = 0; i < 80; i++)
+            System.out.print(" ");
+        
+        for (int i = 0; i < 80; i++)
+            System.out.print("\b");
+        
+    }
     /**
      * Print the text in the center of an 80-column screen
      * 
@@ -133,6 +159,8 @@ public class AudioView
      * 
      * Modification: **MLN - fixed newline after retry (pa2)
      *                     - added check for null errorMessage
+     *                     
+     *                     ** RAC - add check for spaces only input
      * 
      * @param true if the entry is required, false otherwise
      * @param the error message to print
@@ -163,7 +191,23 @@ public class AudioView
 
                     } // end if
                     else
-                        isValid = true;
+                    {
+                        isValid = false;
+                        
+                        for (int i = 0; i < input.length(); i++)
+                        {
+                            if (input.charAt(i) != ' ')
+                            {
+                                isValid = true;
+                                i = input.length();
+                            }
+                                
+                        }
+                        
+                        
+                        if ( !isValid )
+                            displayError(errorMessage );
+                    }
 
                 } // end if
 

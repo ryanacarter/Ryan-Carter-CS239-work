@@ -5,18 +5,25 @@ import java.util.*;
 /**
  * The collection of AudioFile object
  * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
  * Modifications: **MLN PA2 (2/10/2013) 
- *  - Modified class to function as a set
+ *    - Modified class to function as a set
  *    - changed storage structure from array to ArrayList
  *    - modified add to guarantee uniqueness 
  *    - modified to place in alpha order 
- *      - added private methods: append, insert, isLast to assist in alpha 
+ *    - added private methods: append, insert, isLast to assist in alpha 
  *        adding  
  *    - added contains to assist in set functions
  *    - added clear method because I could
  *    - added difference, intersection, and union methods because this is a set
- *  - Modified add to prevent adding of malformed records (missing artist/
- *    title)
+ *    - Modified add to prevent adding of malformed records (missing artist/
+ *       title)
+ *    
  * 
  * @author Michael L. Norton
  * @version PA2 (2/12/2013), PA1 (1/18/2013)
@@ -57,9 +64,13 @@ public class AudioList
             if ( !list.contains( newFile ) )
             {
                 if ( list.size() == 0 || isLast( newFile ) )
+                {
                     append( newFile );
+                }
                 else
+                {
                     insert( newFile );
+                }
             } // end if
 
     } // method add
@@ -110,6 +121,7 @@ public class AudioList
         return difference;
         
     } // method difference
+
 
     /**
      * Get a particular audio file
@@ -256,7 +268,9 @@ public class AudioList
     private void append( AudioFile file )
     {
         if ( file != null )
+        {
             list.add( file );
+        }
 
     } // method append
     

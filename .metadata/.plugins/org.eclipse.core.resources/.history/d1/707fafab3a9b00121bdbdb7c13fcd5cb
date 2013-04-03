@@ -1,0 +1,469 @@
+package Controller;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.TagException;
+
+import Model.*;
+import View.*;
+
+/**
+ * Read/Write "Songlist.txt" & write "malformed.err"
+ * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
+ * Modifications: **MLN: PA2 (2/20/2012) - New for PA2
+ * 
+ * **RAC PA3 (3/29/2013) - moved the searching for the new files to this class
+ * 
+ * @author Ryan Carter, Michael Norton
+ * @version PA3 (3/29/2013), PA2 (2/12/2013)
+ */
+public class AudioFileControl 
+{
+    //----------------------------------------------------------------------
+    // Declarations
+    //----------------------------------------------------------------------
+    private AudioList list;
+    private AudioView view;
+
+   /**
+    * Default constructor 
+    */
+    public AudioFileControl( AudioList list )
+    {        
+        this.list = list;
+        view = new AudioView();
+    
+    } // default constructor
+    
+    /**
+     * findNewFiles - finds newFiles from a specified directory.
+     * 
+     * @param choice
+     * @param directory
+     * @return
+     */
+    public AudioList addNewFiles( String directory, int choice )
+    {
+        findNewFiles( directory, choice );
+        
+        return list; 
+    }
+
+
+    /**
+     * Read the file if it exists and populate the Library
+     */
+    public void readFile() 
+    {   
+        AudioFileIO audioFile = new AudioFileIO();
+        AudioFileIO errFile = new AudioFileIO();
+        
+        // Declare String to hold a line from the file
+        String audioLine = null;
+        
+        // open the audio file for reading and the error file for writing
+        audioFile.open( "Songlist.txt" , View.AudioFileIO.READING );
+        errFile.open( "malformed.err" , AudioFileIO.WRITING );
+
+        // make sure the reader for the file exists
+        if ( audioFile.exists() )
+        {
+            // read first line from the library file
+            audioLine = audioFile.readLine();
+            
+            while ( audioLine != null )
+            {                
+                AudioFile file = createAudioFile( audioLine );
+                
+                if ( file != null )
+                    list.add( file );
+                else
+                    errFile.write( audioLine );
+                
+                audioLine = audioFile.readLine();
+
+            } // end while
+
+            // close the reader & writer (for malformed.err)
+            audioFile.close();
+            errFile.close();
+
+        } // end if
+
+    } // method readFiles
+    
+
+    /**
+     * write the library to a data file
+     */
+    public void writeFile()
+    {   
+        AudioFileIO audioFile = new AudioFileIO();
+
+        // open the audio data file for writing
+        audioFile.open( "Songlist.txt" , AudioFileIO.WRITING );
+
+        // read through the library
+        for ( int i = 0; i < list.size(); i++)
+        {
+            // write the library file
+            AudioFile file = list.get( i );
+            
+            if (file instanceof MP3File )
+                audioFile.write( createAudioFile( ( MP3File )file ) );
+            
+            if (file instanceof WavFile )
+                audioFile.write( createAudioFile( ( WavFile )file ) );
+            
+        } // end for
+        
+        // close the writer
+        audioFile.close();
+         
+    } // method writeFiles  
+    
+    /************************** private methods ***************************/
+    
+    /**
+     * addMP3 - takes and mp3 file and adds it to the list.
+     * 
+     * **RAC PA3 (3/29/2013) - added to AudioFileControl
+     * 
+     * @param file
+     */
+    private void addMP3(File file)
+    {
+        String artist = "";
+        String title = "";
+        String album = "";
+        String trackString = "";
+        int track = 0;
+        String label = "";
+        String path = "";
+        int bitrate = 0;
+        
+        AudioFile mp3;
+        org.jaudiotagger.audio.AudioFile f;
+        Tag tag;
+        
+        try
+        {
+            f = org.jaudiotagger.audio.AudioFileIO.read(file);
+            tag = f.getTag();
+            
+            try
+            {
+                artist = tag.getFirst(FieldKey.ARTIST);
+            }
+            catch ( NullPointerException e )
+            {
+                artist = file.getName();
+            }
+            try
+            {
+                title = tag.getFirst(FieldKey.TITLE);
+            }
+            catch ( NullPointerException e )
+            {
+                title = file.getName();
+            }
+            try
+            {
+                album = tag.getFirst(FieldKey.ALBUM);
+                trackString = tag.getFirst(FieldKey.TRACK);
+                try
+                {
+                    track = Integer.parseInt( trackString );
+                }
+                catch (NumberFormatException e){}
+
+                label = tag.getFirst(FieldKey.RECORD_LABEL);
+                path = file.getPath();
+                bitrate = (int) f.getAudioHeader().getBitRateAsNumber();
+            }
+            catch (NullPointerException e) {/*do nothing*/}
+
+            mp3 = new MP3File( artist, title,  album, track,
+                    path, label, bitrate);
+            
+            list.add(mp3);
+            
+            view.clearLine();
+            view.display(mp3 + " . . .");
+            
+        }
+        catch ( CannotReadException e ) {/*do nothing*/}
+        catch ( IOException e ){/*do nothing*/}
+        catch ( TagException e ) {/*do nothing*/}
+        catch ( ReadOnlyFileException e ) {/*do nothing*/}
+        catch ( InvalidAudioFrameException e ) {/*do nothing*/}
+        
+    }  // end method 
+
+    
+    /**
+     * addWAV - adds new found WAVFiles.
+     * 
+     * **RAC PA3 (3/29/2013) - added to AudioFileControl
+     * 
+     * @param string audioFile in which to add to the list
+     */
+    private void addWAV(File file)
+    {   
+        AudioFile wav = new WavFile(file.getName(), file.getPath(), (long)file.length());
+        
+        view.clearLine();
+        view.display(wav + " . . .");
+
+        list.add(wav);
+        
+    } // end method
+
+
+    /**
+     * Create a AudioFile object from the text line.  If the line is malformed
+     * return null
+     * 
+     * **RAC (PA3) - allowed for both MP3 and WAV to be added seperatly.
+     * 
+     * @param the line from the file
+     * @return an AudioFile if good, null otherwise
+     */
+    private AudioFile createAudioFile( String line )
+    {
+        MP3File mp3 = new MP3File();
+        WavFile wav = new WavFile();
+        AudioFile audio = null;
+
+        String[] elements = line.split( "\\|" );
+
+        // skip malformed records
+        if ( !isMalformed( elements ) )
+        {
+            if ( elements[ 0 ].equals( "1" ) )
+            {
+                mp3.setArtist( elements[1].trim() );
+                mp3.setTitle( elements[2].trim() );
+                mp3.setAlbum( elements[3].trim() );
+                mp3.setTrack( elements[4].trim() );
+                mp3.setPathName(elements[5].trim() );
+                mp3.setLabel(elements[6].trim() );
+                try
+                {
+                    mp3.setBitRate(Integer.parseInt( elements[7].trim() ) );
+                }
+                catch (NumberFormatException e) {/* do nothing */}
+                
+                audio = mp3;
+            }
+            else
+                mp3 = null;
+            
+            if ( elements[ 0 ].equals( "2" ) )
+            {
+                wav.setArtist( elements[1].trim() );
+                wav.setTitle( elements[2].trim() );
+                wav.setAlbum( elements[3].trim() );
+                wav.setTrack( elements[4].trim() );
+                wav.setPathName( elements[5].trim() );
+                try
+                {
+                    wav.setLength(Long.parseLong( elements[6].trim() ) );
+                }
+                catch (NumberFormatException e) {/* do nothing */}
+                
+                audio = wav;
+            }
+            else
+                mp3 = null;
+
+        } // end if
+        
+        
+
+        return audio;
+
+    } // method createFile
+
+
+    /**
+     * Create a output line to write from an AudioFile object
+     * 
+     * **RAC (PA3) - overLoaded to handle MP3Files
+     * 
+     * @param the MP3File to translate
+     * @return the String representation of the AudioFile
+     */
+    private String createAudioFile( MP3File file )
+    {
+        String album = " ";
+        String artist = "";
+        String title = "";
+        String track = "";
+        String pathName = "";
+        String label = "";
+        int bitrate = 0;
+
+        artist = file.getArtist();
+        title = file.getTitle();
+
+        if ( file.getAlbum().trim().length() != 0 )
+            album = file.getAlbum();
+        if ( file.getTrack() != 0 )
+            track = "" + file.getTrack();
+
+        pathName = file.getPathName();
+        label = file.getLabel();
+        bitrate = file.getBitrate();
+        
+
+        return "1|" + artist + "|" + title + "|" + album + "|" + track + "|"
+                          + pathName + "|" + label + "|" + bitrate + "|";
+
+    } // method createAudioFile (overloaded)
+    
+    
+    /**
+     * Create a output line to write from an AudioFile object
+     * 
+     * **RAC (PA3) - overloaded to handle WavFiles
+     * 
+     * @param the WavFile to translate
+     * @return the String representation of the AudioFile
+     */
+    private String createAudioFile( WavFile file )
+    {
+        String album = "";
+        String artist = "";
+        String title = "";
+        String track = "";
+        String pathName = "";
+        String length = "";
+
+        artist = file.getArtist();
+        title = file.getTitle();
+
+        if ( file.getAlbum().trim().length() != 0 )
+            album = file.getAlbum();
+        
+        if ( file.getTrack() != 0 )
+            track = "" + file.getTrack();
+
+        pathName = file.getPathName();
+        if ( file.getLength() != 0 )
+            length = "" + file.getLength();
+        
+
+        return "2|" + artist + "|" + title + "|" + album + "|" + track + "|"
+                            + pathName + "|" + length + "|";
+
+    } // method createAudioFile (overloaded)
+
+    
+    /**
+     * findNewFiles - is used to find and add new WAV audioFiles.
+     * 
+     * **RAC (PA3) - added to AudioFileControl.
+     * 
+     * @param directory gives the staring directory
+     * @param choice 1 = MP3, 2 = WAV, 3 = Both
+     */
+    private void findNewFiles(String directory, int choice)
+    {
+        Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
+        File dirFile = new File( directory );
+        File[] files;
+        
+        // test everything up front
+        if ( dirFile.isDirectory()                       &&
+                dirFile.canRead()                        &&
+                !dirFile.getName().equals( "." )    &&
+                !dirFile.getName().equals( ".." ) );
+        {
+
+            files = dirFile.listFiles();
+
+            if ( files != null )
+            {
+                for (int i = 0; i <files.length; i++)
+                {   
+                    if ( choice == 1 )
+                    {
+                        if ( files[i].getName().endsWith( ".mp3" ) )
+                            addMP3( files[i] );
+                    }
+                    
+                    else if ( choice == 2 )
+                    {
+                        if ( files[i].getName().endsWith( ".wav" ) )
+                            addWAV( files[i] );
+                    }
+                    else if ( choice == 3 )
+                    {
+                        if ( files[i].getName().endsWith( ".mp3" ) )
+                        {
+                            addMP3( files[i] );
+                        }
+                        else if ( files[i].getName().endsWith( ".wav" ) )
+                        {
+                            addWAV( files[i] );
+                        }
+                    }
+                        
+                }
+
+                for ( int i = 0; i < files.length; i++ )
+                    // redundant but more efficient
+                    if ( files[i].isDirectory() )
+                        findNewFiles( files[i].getPath(), choice );
+
+            } // end if
+
+        } // end if
+
+    } // end method
+    
+
+    /**
+     * Check the line to see if it is malformed.  
+     * 
+     * **RAC (PA3) - took into consideration WAV and MP3 files
+     * 
+     * @param an array of elements
+     * @return true if the line is malformed, false otherwise
+     */
+    private boolean isMalformed( String[] elements )
+    {
+        boolean isMalformed = true;
+
+        if ( elements[0].equals( "1" ) )
+            if ( elements.length == 8 )
+                if ( elements[ 0 ].trim().length() > 0 )
+                    if ( elements[ 1 ].trim().length() > 0 )
+                        isMalformed = false;
+        
+        if ( elements[0].equals( "2" ) )
+            if ( elements.length == 7 )
+                if ( elements[ 0 ].trim().length() > 0 )
+                    if ( elements[ 1 ].trim().length() > 0 )
+                        isMalformed = false;
+
+        return isMalformed;
+
+    } // method isMalformed
+
+} // class AudioFileControl

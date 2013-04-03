@@ -1,0 +1,165 @@
+package Model;
+
+/**
+ * The WavFile Class is a class that has been create to extend the 
+ * functionality AudioFile.
+ * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
+ * @author Ryan Carter
+ * @version PA3 (3/29/2013)
+ */
+public class WavFile extends AudioFile
+{
+ 
+    private long length;
+    private String pathName;
+    
+    
+    /**
+     * Default Constructor
+     */
+    public WavFile()
+    {
+        super.artist = "";
+        this.length = 0;
+        this.pathName = "";
+        super.title = "";
+        
+    } // end method
+    
+    
+    /**
+     * Explicit Value Constructor
+     * 
+     * @param name (String)
+     * @param pathName  (String)
+     * @param size (long)
+     */
+    public WavFile(String name, String pathName, long size)
+    {
+        super.title = name;
+        super.artist = name;
+        this.pathName = pathName;
+        this.length = size;
+        
+    } // end method
+    
+    
+    /**
+     * Explict Value Constructor
+     * 
+     * @param artist (String)
+     * @param title (String)
+     * @param album (String)
+     * @param track (int)
+     * @param fileName (String)
+     * @param length (long)
+     */
+    public WavFile(String artist, String title, String album, int track,
+            String pathName, long length)
+    {
+        this.artist = ( artist == null || artist.length() == 0 ) ? 
+                "No Artist" : artist;
+        this.title = ( title == null || title.length() == 0 ) ? 
+                "No Title" : title;
+        this.album = album == null ? "" : album;
+        this.track = track < 0 || track > 99 ? 0 : track;
+        this.pathName = ( pathName == null || pathName.length() == 0 ) ? 
+                "No Path" : pathName;
+        this.length = length;
+        
+    } // end method
+    
+ 
+/********************************PUBLIC METHODS*******************************/
+    
+    /**
+     * Returns true if all attributes in this AudioFile are the same as
+     * those in the other AudioFile.  This method overrides the built-in
+     * equals() method.
+     * 
+     * **RAC (PA3) - added to WavFile
+     * 
+     * @param the other AudioFile
+     * @return true if both AudioFiles contain the same values for all
+     *         attributes
+     */
+    public boolean equals( Object other )
+    {
+        boolean isEqual = false;
+
+        if ( other != null )
+            if ( this == other )
+                isEqual = true; // if the same object
+            else
+            {
+                try
+                {
+                    WavFile audio = (WavFile) other;
+
+                    if ( artist.equals( audio.getArtist() )
+                            && title.equals( audio.getTitle() )
+                            && album.equals( audio.getAlbum() )
+                            && track == audio.getTrack() 
+                            && pathName.equals( audio.getPath() )
+                            && length == audio.getLength() )
+                    {
+                        isEqual = true; // if different, but contents are the same
+                    }
+                }
+                catch (ClassCastException e) {/* do nothing */}
+
+            } // end else
+
+        return isEqual;
+
+    } // method equals
+    
+    
+    /**
+     * getLength - returns the size of the WAV file.
+     */
+    public Long getLength()
+    {
+        return length;
+        
+    } // end method
+    
+    
+    /**
+     * getFileName - returns the pathname of the audio file.
+     */
+    public String getPath()
+    {
+        return pathName;
+        
+    } // end method
+    
+    
+    /**
+     * setLength - sets the length.
+     * 
+     * @param length (long)
+     */
+    public void setLength( long length )
+    {
+        this.length = length;
+    } // end method
+    
+    
+    /**
+     * setPath - sets the path.
+     * 
+     * @param path (String)
+     */
+    public void setPath( String path )
+    {
+        this.pathName = path;
+    }
+
+} // end class

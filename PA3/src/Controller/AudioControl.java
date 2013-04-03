@@ -7,13 +7,24 @@ import Model.*;
  * Controls the action of the JMUTunes application. This is the only class
  * that has references to the model and view classes
  * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
  * Modifications: **MLN PA2 (2/10/2013) 
  *   - modified delete method to allow deletion of user selected file
  *   - enabled edit method to edit user selected file
  *   - created overloaded getAudioInfo(AudioFile) to handle edit
+ *   
+ *   Modificaiton: **RAC PA3 (3/29/2013)
+ *   - deleted getAudioInfo due to change in add method
+ *   - deleted overloaded getAudioInfor
+ *   - edit now class to the edit class to handle the editing of the file
  * 
- * @author Michael Norton
- * @version PA2 (2/12/2013), PA1 (1/19/2013)
+ * @author Ryan Carter, Michael Norton
+ * @version PA3 (3/29/2013), PA2 (2/12/2013), PA1 (1/19/2013)
  */
 public class AudioControl
 {
@@ -23,7 +34,10 @@ public class AudioControl
     private int page;
 
     private AudioList list;
+    private AudioList searchList;
     private AudioView view;
+    private AudioFileControl fileController;
+    private boolean inSearch;
 
     // public static finals
     public static char ADD = 'a';
@@ -38,13 +52,18 @@ public class AudioControl
 
     /**
      * Default constructor
+     * 
+     * **RAC (PA3) - added the boolean insearch
      */
     public AudioControl()
     {
         page = 0;
-
+        
+        inSearch = false;
         list = new AudioList();
+        searchList = new AudioList();
         view = new AudioView();
+        fileController = new AudioFileControl( list );
 
     } // default constructor
 
@@ -58,11 +77,14 @@ public class AudioControl
      * continue until the user chooses to quit.
      * 
      * **MLN (PA2) - Modified for PA2 to read/write files
+     * 
+     * **RAC (PA3) - added search screen boolean to all the change between
+     *                       searchList and list
      */
     public void run() 
     {
         char choice = (char) 0; // default to nonsensical value
-        AudioFileControl fileController = new AudioFileControl( list );
+
         
         fileController.readFile();
 
@@ -82,17 +104,41 @@ public class AudioControl
 
     /**
      * Add an audio file to the list
+     * 
+     * **RAC (PA3) - go back to home screen at the end if user in in search
      */
     private void addAudioFile()
     {
-        AudioFile song = getAudioInfo();
+        // if 1, the user wants to look for a file that is MP3, if 2 the user wants
+        // the method to search for a file that is a WAV. 3 means both.
+        int audioType = 0;
+        String directory = null;
+        
+        // Print the menu for the user to choose
+        
+        if ( isConfirmed( "Add audio files from disk (Y/N)? -> " ) )
+        {
+            view.clearScreen();
+            view.displayLine("Add MP3 files, Wav files, or both:");
+            view.displayLine("1. MP3 Files");
+            view.displayLine("2. WAV Files");
+            view.displayLine("3. Both");
+            view.display("-> ");
+            audioType = view.getNumber(true, 1, 3);
 
-        if ( isConfirmed( "Add (Y/N ): " ) )
-            list.add( song );
+            // get starting directory
+            view.displayLine("");
+            view.display("Starting Folder -> ");
+            directory = view.getInput(false, "");
 
-        // move to the next page if adding beyond the current page
-        if ( list.size() > page * 16 + 16 )
-            page++;
+            // Choose the correct subclass to finish adding the audioFiles to 
+            // the list.
+            fileController.addNewFiles(directory, audioType);
+
+            // go back to home screen if the user was in a search
+            inSearch = false;
+            
+        } // end if
 
     } // method addAudioFile
 
@@ -101,6 +147,7 @@ public class AudioControl
      * Delete an audio file (PA1 - delete last audio file)
      * 
      * **MLN (PA2) - allow deletion of the file chosen by the user
+     * **RAC (PA3) - accomidates for the search list.
      */
     private void deleteAudioFile()
     {
@@ -109,23 +156,41 @@ public class AudioControl
             int fileNumber = 0;
             AudioFile deleteFile;
 
-            view.display( "Delete file number -> " );
-            fileNumber = view.getNumber( true, 1 , list.size() );
+            if (!inSearch)
+            {
+                view.display( "Delete file number -> " );
+                fileNumber = view.getNumber( true, 1 , list.size() );
 
-            deleteFile = list.get( fileNumber - 1 );
+                deleteFile = list.get( fileNumber - 1 );
 
-            view.clearScreen();
-            view.centerText( "Delete Audio File" );
-            view.displayLine();
-            view.displayLine();
+                view.clearScreen();
+                view.centerText( "Delete Audio File" );
+                view.displayLine();
+                view.displayLine();
 
-            if ( isConfirmed( "Delete \"" + deleteFile.toString()
-                    + "\"? (Y/N) -> " ) )
-               list.remove( list.size() - 1 );
+                if ( isConfirmed( "Delete \"" + deleteFile.toString()
+                        + "\"? (Y/N) -> " ) )
+                    list.remove( list.size() - 1 );
+            }
+            else
+            {
+                view.display( "Delete file number -> " );
+                fileNumber = view.getNumber( true, 1 , searchList.size() );
 
-            // move to the prior page if removing the last item on a page > 1
-            if ( list.size() > 0 && list.size() < page * 16 + 1 )
-                page--;
+                deleteFile = searchList.get( fileNumber - 1 );
+
+                view.clearScreen();
+                view.centerText( "Delete Audio File" );
+                view.displayLine();
+                view.displayLine();
+
+                if ( isConfirmed( "Delete \"" + deleteFile.toString()
+                        + "\"? (Y/N) -> " ) )
+                {
+                    searchList.remove( list.size() - 1 );
+                    list.remove( list.size() - 1 );
+                }
+            }
 
         } // end if
 
@@ -139,131 +204,70 @@ public class AudioControl
      * Edit an audio file (not functional in PA1)
      * 
      * **MLN (PA2) - Edit file chosen by the user
+     * **RAC (PA3) - Edit both MP3 and WAV files
+     *                     - accomidate for the search function
      */
     private void editAudioFile()
     {
+        Edit edit = new Edit( view );
+
         if ( list.size() > 0 )
         {
             int fileNumber = 0;
             AudioFile original;
             AudioFile edited;
 
-            view.display( "Edit file number -> " );
-            fileNumber = view.getNumber( true, 1 , list.size() );
-
-            original = list.get( fileNumber - 1 );
-
-            if ( isConfirmed( "Edit \""
-                    + original.toString()
-                    + "\"? (Y/N) -> " ) )
+            if (!inSearch)
             {
-                edited = getAudioInfo( original );
+                view.display( "Edit file number -> " );
+                fileNumber = view.getNumber( true, 1 , list.size() );
 
-                if ( isConfirmed( "Confim Edit (Y/N): " ) )
+                original = list.get( fileNumber - 1 );
+
+                if ( isConfirmed( "Edit \""
+                        + original.toString()
+                        + "\"? (Y/N) -> " ) )
                 {
-                    list.remove( original );
-                    list.add( edited );
+                    edited = edit.editAudioFile( original );
 
-                } // end if
+                    if ( isConfirmed( "Confim Edit (Y/N): " ) )
+                    {
+                        list.remove( original );
+                        list.add( edited );
 
+                    } // end if
+                }
             }
-            // move to the next page if adding beyond the current page
-            if ( list.size() > page * 16 + 16 )
-                page++;
+            
+            else
+            {
+                view.display( "Edit file number -> " );
+                fileNumber = view.getNumber( true, 1 , searchList.size() );
+
+                original = searchList.get( fileNumber - 1 );
+
+                if ( isConfirmed( "Edit \""
+                        + original.toString()
+                        + "\"? (Y/N) -> " ) )
+                {
+                    edited = edit.editAudioFile( original );
+
+                    if ( isConfirmed( "Confim Edit (Y/N): " ) )
+                    {
+                        searchList.remove( original );
+                        searchList.add( edited );
+
+                        list.remove( original );
+                        list.add( edited );
+                    }
+
+                }
+            }
         }
         else
             view.pause( "Nothing to edit." );
 
-    } // method editAudioFile
-
-
-    /**
-     * Get the Audio file information from the user and create an AudioFile
-     * object to add to the list
-     * 
-     * @return an AudioFile object
-     */
-    private AudioFile getAudioInfo()
-    {
-        int track = 0;
-
-        String album = "";
-        String artist = "";
-        String title = "";
-
-        // print header
-        view.clearScreen();
-        view.centerText( "Add Audio File" );
-        view.displayLine();
-        view.displayLine();
-
-        view.display( "Artist: " );
-        artist = view.getInput( true , "Required entry." );
-
-        view.display( "Title:  " );
-        title = view.getInput( true , "Required entry." );
-
-        view.display( "Album:  " );
-        album = view.getInput( false , "" );
-
-        view.display( "Track:  " );
-        track = view.getNumber( false, 1 , 99 );
-
-        return new AudioFile( artist , title , album , track );
-
-    } // method getAudioInfo
-
-
-    /**
-     * Get the Audio file information from an existing AudioFile for
-     * the user to edit
-     * 
-     * **MLN (PA2) - added for the edit function
-     * 
-     * @return an AudioFile object
-     */
-    private AudioFile getAudioInfo( AudioFile original )
-    {
-        int orgTrack = original.getTrack();
-        int track = 0;
-
-        String album = "";
-        String artist = "";
-        String orgAlbum = original.getAlbum();
-        String orgArtist = original.getArtist();
-        String orgTitle = original.getTitle();
-        String title = "";
-        
-        // print header
-        view.clearScreen();
-        view.centerText( "Edit Audio File" );
-        view.displayLine();
-        view.displayLine();
-
-        view.display( "Artist" + 
-                ( orgArtist.length() > 0 ? " (" + orgArtist + "): " : ": " ) );
-        artist = view.getInput( false , "" );
-
-        view.display( "Title" +
-                ( orgTitle.length() > 0 ? " (" + orgTitle + "): " : ": " ) );
-        title = view.getInput( false , "" );
-
-        view.display( "Album" + 
-                ( orgAlbum.length() > 0 ? " (" + orgAlbum + "): " : ": " ) );
-        album = view.getInput( false , "" );
-
-        view.display( "Track" +
-                ( orgTrack != 0 ? " (" + orgTrack + "): " : ": " ) );
-        track = view.getNumber( false, 1 , 99 );
-
-        artist = artist.length() > 0 ? artist : orgArtist;
-        title = title.length() > 0 ? title : orgTitle;
-        album = album.length() > 0 ? album : orgAlbum;
-        track = track != 0 ? track : orgTrack;        
-        
-        return new AudioFile( artist , title , album , track );
-
-    } // method getAudioInfo (overloaded for edit)
+        } // method editAudioFile
 
 
     /**
@@ -292,6 +296,41 @@ public class AudioControl
         return input.toLowerCase().charAt( 0 );
 
     } // method getChoice
+    
+    
+    /**
+     * getSearchInformation - is used to narrow down the AudioList to fit
+     * the critera of what is being searched for.
+     * 
+     * @param string
+     * @param list
+     */
+    private String[] getSearchCriteria(String param)
+    {
+        int counter = 0;
+        String placeHolder = "";
+        String[] searchString = new String[20];
+        
+        if (param != null && param != "")
+        {
+            do
+            {   
+                view.display(param);
+                placeHolder = view.getInput(false, "");
+                
+                 if (!placeHolder.equals( "" ) )
+                     searchString[counter] = placeHolder;
+                         
+                counter++;
+                
+            }
+            while(searchString[counter -1] != null );
+
+        }
+        
+        return searchString;
+
+    } // end method
 
 
     /**
@@ -367,11 +406,22 @@ public class AudioControl
 
     /**
      * Print the next page of audio files if there is one
+     * 
+     * **RAC (PA3) - added the conditional statement to handle the search
      */
     private void nextPage()
     {
-        if ( list.size() > page * 16 + 16 )
-            page++;
+        if (!inSearch)
+        {
+            if ( list.size() > page * 16 + 16 )
+                page++;
+        }
+        else
+        {
+            if ( searchList.size() > page*16 + 16 )
+                page++;
+        }
+         
 
     } // method nextPage
 
@@ -443,28 +493,97 @@ public class AudioControl
 
 
     /**
-     * Search for audio files (not functional in PA1)
+     * Search for audio files
+     * 
+     * **RAC (PA3) - added functionality
      */
     private void searchAudioFiles()
-    {
-        view.showUnavailable( "Search Audio Files" );
+    {   
+        String[] album = new String[20];
+        String[] artist = new String[20];
+        String[] title = new String[20];
+        Search search = new Search(list);
+        
+        // show the header on the user input screen
+        showEditHeader();
+        
+        // get all of the search critera from the user
+        artist = getSearchCriteria("Artist: ");
+        title = getSearchCriteria("Title: ");
+        album = getSearchCriteria("Album: ");
 
+        if ( isConfirmed( "Search (Y/N) -> " ) )
+        {
+            searchList = list;
+            
+            // get a list of all thing that match the criteria
+            if (artist[0] != null)
+                searchList = search.addFiles(artist, "artist", searchList );
+
+            if (title[0] != null)
+                searchList = search.addFiles(title, "title", searchList );
+
+            if (album[0] != null)
+                searchList = search.addFiles(album, "album", searchList );
+
+            // if all three responce are null, go back to main list
+            if (artist[0] == null)
+                if (album[0] == null)
+                    if (title[0] == null)
+                        searchList = null;
+        }
+        else
+        {
+            if (!inSearch)
+                searchList = null;
+        }
+        
+        if(searchList == null)
+            inSearch = false;
+        else
+        {
+            inSearch = true;
+            page = 0;
+        }
+        
     } // method searchAudioFiles
 
 
     /**
      * Show the body of the page
+     * 
+     * Modification: **RAC - added if statement to account for search
      */
     private void showBody()
     {
-        for (int i = page * 16 + 1; i < page * 16 + 17; i++)
+        if ( !inSearch )
+            for (int i = page * 16 + 1; i < page * 16 + 17; i++)
+                view.displayLine( spaceFillNumber( i ) + ". "
+                        + list.getShortTitle( i - 1 ) );
+        else
         {
-            view.displayLine( spaceFillNumber( i ) + ". "
-                    + list.getShortTitle( i - 1 ) );
-
-        } // end for
+            for (int i = page * 16 + 1; i < page * 16 + 17; i++)
+                view.displayLine( spaceFillNumber( i ) + ". "
+                        + searchList.getShortTitle( i - 1 ) );
+            
+        }
 
     } // method showBody
+    
+    
+    /**
+     * showHeader - shows the header for the edit screen
+     */
+    private void showEditHeader()
+    {
+        view.clearScreen();
+        view.centerText("Search Audio Files");
+        view.displayLine();
+        view.centerText("^ = starts with, $ = ends with, !() = not, " +
+                "no symbol = contains");
+        view.displayLine();
+        
+    } // end method
 
 
     /**
@@ -483,11 +602,17 @@ public class AudioControl
 
     /**
      * Show the top of the primary screen
+     * 
+     * Modification: **RAC - added if statement to account for search
      */
     private void showHead()
     {
         view.centerText( "JMUTunes Audio Player" );
         view.centerText( "CS239 (Spring 2013)" );
+        if (inSearch)
+            view.centerText("Search Results");
+        else
+            view.displayLine();
         view.displayLine();
 
     } // method showHead
@@ -495,6 +620,7 @@ public class AudioControl
 
     /**
      * Show the primary screen
+     * 
      */
     private void showScreen()
     {

@@ -1,0 +1,170 @@
+package Model;
+
+/**
+ * The MP3File Class is a class that has been create to extend the 
+ * functionality AudioFile.
+ * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
+ * @author Ryan Carter
+ * @version PA3 (3/29/2013)
+ */
+public class MP3File extends AudioFile
+{
+    
+    protected String label;
+    protected String path;
+    protected int bitrate;
+
+    
+    /**
+     * Default constructor
+     */
+    public MP3File()
+    {
+        album = "";
+        artist = "";
+        title = "";
+        track = 0;
+        label = "";
+        path = "";
+        bitrate = 0;
+
+    } // default constructor
+    
+    /**
+     * Explicit value constructor
+     * 
+     * @param Artist
+     * @param title
+     * @param album
+     * @param track
+     * @param label
+     * @param fileName
+     * @param bitRate
+     */
+    public MP3File(String artist, String title, String album, int track,
+            String label, String path, int bitrate)
+    {
+        this.artist = ( artist == null || artist.length() == 0 ) ? 
+                "No Artist" : artist;
+        this.title = ( title == null || title.length() == 0 ) ? 
+                "No Title" : title;
+        this.album = album == null ? "" : album;
+        this.track = track < 0 || track > 99 ? 0 : track;
+        this.label = ( label == null || label.length() == 0 ) ? 
+                "No Label" : label;
+        this.path = ( path == null || path.length() == 0 ) ? 
+                "No Path" : path;
+        this.bitrate = bitrate;
+
+    } // end explicit value constructor
+
+/**************************PUBLIC METHODS*************************************/
+    
+    
+    /**
+     * Returns true if all attributes in this AudioFile are the same as
+     * those in the other AudioFile.  This method overrides the built-in
+     * equals() method.
+     * 
+     * **MLN (PA2) - added to facilitate the AudioList contains method
+     * 
+     * @param the other AudioFile
+     * @return true if both AudioFiles contain the same values for all
+     *         attributes
+     */
+    public boolean equals( Object other )
+    {
+        boolean isEqual = false;
+
+        if ( other != null )
+            if ( this == other )
+                isEqual = true; // if the same object
+            else
+            {
+                AudioFile audio = (AudioFile) other;
+
+                if ( artist.equals( audio.getArtist() )
+                        && title.equals( audio.getTitle() )
+                        && album.equals( audio.getAlbum() )
+                        && track == audio.getTrack() )
+                    isEqual = true; // if different, but contents are the same
+                
+            } // end else
+
+        return isEqual;
+
+    } // method equals
+    
+    
+    /**
+     * getBitRate - returns bitRate
+     * 
+     * @return
+     */
+    public int getBitrate()
+    {
+        return bitrate;
+    }
+
+
+    /**
+     * getLabel - returns label information
+     * 
+     * @return
+     */
+    public String getLabel()
+    {
+        return label;
+    } // end method
+    
+    
+    /**
+     * getFile - returns fileName
+     * 
+     * @return
+     */
+    public String getPath()
+    {
+        return path;
+    } // end method
+    
+    
+    /**
+     * setBitRate - set the bitRate
+     * 
+     * @param bitRate
+     */
+    public void setBitRate( int bitrate )
+    {
+        this.bitrate = bitrate;
+    }
+    
+    
+    /**
+     * setLabel - sets the Label
+     * 
+     * @param label
+     */
+    public void setLabel( String label )
+    {
+        this.label = label;
+    }
+
+    
+    /**
+     * setPath - sets the path
+     * 
+     * @param path
+     */
+    public void setPath( String path )
+    {
+        this.path = path;
+    }
+    
+} // end class

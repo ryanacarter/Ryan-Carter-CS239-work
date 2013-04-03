@@ -14,7 +14,7 @@ public class JMUTunes
      * @param args
      */
     public static void main( String[] args )
-    {
+    {        
         AudioControl control = new AudioControl();
         control.run();
         

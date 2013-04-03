@@ -6,4 +6,21 @@
 <fullyQualifiedTypeName name="java.io.BufferedReader"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="java.util.StringTokenizer"/>
+<fullyQualifiedTypeName name="javax.swing.text.View"/>
+<fullyQualifiedTypeName name="java.io.File"/>
+<fullyQualifiedTypeName name="org.jaudiotagger.audio.wav.WavFileReader"/>
+<fullyQualifiedTypeName name="Model.WavFile"/>
+<fullyQualifiedTypeName name="Model.AudioList"/>
+<fullyQualifiedTypeName name="org.jaudiotagger.audio.mp3.MP3AudioHeader"/>
+<fullyQualifiedTypeName name="org.jaudiotagger.tag.id3.ID3v1Tag"/>
+<fullyQualifiedTypeName name="View.AudioFileIO"/>
+<fullyQualifiedTypeName name="org.jaudiotagger.audio.exceptions.CannotReadException"/>
+<fullyQualifiedTypeName name="Model.AudioFile"/>
+<fullyQualifiedTypeName name="org.jaudiotagger.audio.AudioFileIO"/>
+<fullyQualifiedTypeName name="org.jaudiotagger.tag.Tag"/>
+<fullyQualifiedTypeName name="org.jaudiotagger.tag.FieldKey"/>
+<fullyQualifiedTypeName name="org.jaudiotagger.tag.id3.AbstractID3v2Tag"/>
+<fullyQualifiedTypeName name="org.jaudiotagger.tag.id3.ID3v24Tag"/>
+<fullyQualifiedTypeName name="java.util.logging.Level"/>
+<fullyQualifiedTypeName name="java.util.logging.Logger"/>
 </qualifiedTypeNameHistroy>

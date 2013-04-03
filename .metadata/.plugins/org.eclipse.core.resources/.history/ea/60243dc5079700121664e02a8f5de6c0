@@ -1,0 +1,119 @@
+package Model;
+
+/**
+ * The WavFile Class is a class that has been create to extend the 
+ * functionality AudioFile.
+ * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
+ * @author Ryan Carter
+ * @version PA3 (3/29/2013)
+ */
+public class WavFile extends AudioFile
+{
+ 
+    protected long length;
+    protected String pathName;
+    
+    
+    /**
+     * Default Constructor
+     */
+    public WavFile()
+    {
+        super.title = "";
+        super.artist = "";
+        this.pathName = "";
+        this.length = 0;
+        
+    } // end method
+    
+    /**
+     * Explicit Value Constructor
+     * 
+     * @param name
+     * @param pathName
+     * @param size
+     */
+    public WavFile(String name, String pathName, long size)
+    {
+        super.title = name;
+        super.artist = name;
+        this.pathName = pathName;
+        this.length = size;
+        
+    } // end method
+    
+    
+    /**
+     * Explict Value Constructor
+     * 
+     * @param artist
+     * @param title
+     * @param album
+     * @param track
+     * @param fileName
+     * @param length
+     */
+    public WavFile(String artist, String title, String album, int track,
+            String pathName, long length)
+    {
+        this.artist = ( artist == null || artist.length() == 0 ) ? 
+                "No Artist" : artist;
+        this.title = ( title == null || title.length() == 0 ) ? 
+                "No Title" : title;
+        this.album = album == null ? "" : album;
+        this.track = track < 0 || track > 99 ? 0 : track;
+        this.pathName = ( pathName == null || pathName.length() == 0 ) ? 
+                "No Path" : pathName;
+        this.length = length;
+        
+    } // end method
+    
+    
+    /**
+     * getLength - returns the size of the WAV file.
+     */
+    public Long getLength()
+    {
+        return length;
+        
+    } // end method
+    
+    
+    /**
+     * getFileName - returns the pathname of the audio file.
+     */
+    public String getPath()
+    {
+        return pathName;
+        
+    } // end method
+    
+    
+    /**
+     * setLength - sets the length.
+     * 
+     * @param length
+     */
+    public void setLength( long length )
+    {
+        this.length = length;
+    } // end method
+    
+    
+    /**
+     * setPath - sets the path.
+     * 
+     * @param path
+     */
+    public void setPath( String path )
+    {
+        this.pathName = path;
+    }
+
+} // end class

@@ -11,6 +11,12 @@ import org.junit.*;
 /** 
  * Test the methods of the AudioFileControl class
  * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
  * Modifications: **MLN: PA2 (2/14/2013) - New for PA2
  * 
  * @author Michael Norton
@@ -22,6 +28,8 @@ public class AudioFileControlTest
 
     /**
      * Test method for {@link AudioFileControl#readFile()}.
+     * 
+     * **RAC(PA3) - allows for the adding of WAV and MP3's
      */
     @Test
     public void testReadFile()
@@ -32,10 +40,10 @@ public class AudioFileControlTest
         AudioFileIO malformed;
 
         // create the Songlist.txt file with good and malformed records
-        String line1 = "abc|def| | |";
-        String line2 = "| |def|ghi|1";
-        String line3 = "ghi|jkl|mno| |";
-        String line4 = "abc|def| |";                
+        String line1 = "1|abc|def|he||as|gr|345|";
+        String line2 = "1||def|ghi|1";
+        String line3 = "2|ghi|jkl|mno|0|u|0|";
+        String line4 = "abc|def||";                
         
         file = new AudioFileIO( "Songlist.txt", AudioFileIO.WRITING );        
 
@@ -54,10 +62,10 @@ public class AudioFileControlTest
         
         // check what got written to the AudioList
         assertTrue( list.size() == 2 );
-        assertTrue( list.get( 0 ).equals( new AudioFile( 
-                "abc","def","", 0 ) ) );
-        assertTrue( list.get( 1 ).equals( new AudioFile(
-                "ghi","jkl","mno", 0 ) ) );
+        assertTrue( list.get( 0 ).equals( new MP3File( 
+                "abc","def","he", 0, "as", "gr", 345 ) ) );
+        assertTrue( list.get( 1 ).equals( new WavFile(
+                "ghi","jkl","mno", 0, "u", 0 ) ) );
         
         // check what got written to the malformed.err file
         assertTrue( malformed.exists() );
@@ -69,6 +77,8 @@ public class AudioFileControlTest
 
     /**
      * Test method for {@link AudioFileControl#writeFile()}.
+     * 
+     * **RAC(PA3) - allows for the writting of WAV and MP3's
      */
     @Test
     public void testWriteFile()
@@ -86,8 +96,8 @@ public class AudioFileControlTest
         
         // check that the file exists and is populated correctly
         assertTrue( file.exists() );
-        assertTrue( test.readLine().equals( "abc|def| | |" ) );
-        assertTrue( test.readLine().equals( "ghi|jkl|mno| |" ) );
+        assertTrue( test.readLine().equals( "1|abc|def|he||as|gr|345|" ) );
+        assertTrue( test.readLine().equals( "2|ghi|jkl|mno||u||" ) );
         assertTrue( test.readLine() == null );       
 
     } // method testWriteFile

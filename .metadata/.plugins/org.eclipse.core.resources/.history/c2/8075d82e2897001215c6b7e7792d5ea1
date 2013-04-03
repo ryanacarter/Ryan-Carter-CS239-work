@@ -1,0 +1,116 @@
+package Model;
+
+/**
+ * The MP3File Class is a class that has been create to extend the 
+ * functionality AudioFile.
+ * 
+ * Acknowledgements:  I acknowledge that I have neither given nor 
+ *                                  received assistance for this assignment 
+ *                                   except as noted below:
+ *                                   
+ *                                   none
+ * 
+ * @author Ryan Carter
+ * @version PA3 (3/29/2013)
+ */
+public class MP3File extends AudioFile
+{
+    private int bitrate;
+    private String label;
+
+    
+    /**
+     * Default constructor
+     */
+    public MP3File()
+    {
+        album = "";
+        artist = "";
+        title = "";
+        track = 0;
+        label = "";
+        pathName = "";
+        bitrate = 0;
+
+    } // default constructor
+    
+    /**
+     * Explicit value constructor
+     * 
+     * @param Artist (String)
+     * @param title (String)
+     * @param album (String)
+     * @param track (int)
+     * @param label (String)
+     * @param fileName (String)
+     * @param bitRate (int)
+     */
+    public MP3File(String artist, String title, String album, int track,
+            String path, String label, int bitrate)
+    {
+        this.artist = ( artist == null || artist.length() == 0 ) ? 
+                "No Artist" : artist;
+        this.title = ( title == null || title.length() == 0 ) ? 
+                "No Title" : title;
+        this.album = album == null ? "" : album;
+        this.track = track < 0 || track > 99 ? 0 : track;
+        this.label = ( label == null || label.length() == 0 ) ? 
+                "No Label" : label;
+        this.pathName = ( path == null || path.length() == 0 ) ? 
+                "No Path" : path;
+        this.bitrate = bitrate;
+
+    } // end explicit value constructor
+
+/**************************PUBLIC METHODS*************************************/
+    
+    
+    /**
+     * getBitRate - returns bitRate
+     * 
+     * @return the bitrate of the WavFile
+     */
+    public int getBitrate()
+    {
+        return bitrate;
+        
+    } // end method
+
+
+    /**
+     * getLabel - returns label information
+     * 
+     * @return the label of the WavFile
+     */
+    public String getLabel()
+    {
+        return label;
+        
+    } // end method
+    
+    
+    /**
+     * setBitRate - set the bitRate
+     * 
+     * @param bitRate (int)
+     */
+    public void setBitRate( int bitrate )
+    {
+        this.bitrate = bitrate;
+        
+    } // end method
+    
+    
+    /**
+     * setLabel - sets the Label
+     * 
+     * @param label (String)
+     */
+    public void setLabel( String label )
+    {
+        this.label = label;
+        
+    } // end method
+    
+    
+} // end class
